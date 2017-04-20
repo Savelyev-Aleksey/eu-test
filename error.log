@@ -1,0 +1,1 @@
+[Thu Apr 20 16:45:59.553658 2017] [authz_core:error] [pid 8709] [client 127.0.0.1:43632] AH01630: client denied by server configuration: /home/aleksey/html/eurostudio_php
