@@ -56,10 +56,13 @@ class User extends ORM
 
 
 
-  /*
-  static function to authorize new logining user.
-  Return authorized user instance on success
-  */
+  /**
+   * Static function to authorize new logining user.
+   * Return authorized user instance on success
+   * @param string $login
+   * @param string $raw_pass
+   * @return NULL if error occur or User authorized instance
+   */
   public static function authorize($login, $raw_pass)
   {
     $where = array('login={1}', array('{1}' => $login));
@@ -72,7 +75,7 @@ class User extends ORM
     }
 
     $user = $users[0];
-    
+
     if (!password_verify($raw_pass, $user->password))
     {
       $this->auth_error = 'Password was incorrect';
