@@ -10,4 +10,7 @@ DB::init();
 $user = User::authorize('admin', 'admin');
 var_dump($user->is_authorized());
 
+// add default router
+self::add_router('<controller>(/<action>(/:id))', NULL, NULL);
+
 Router::runner();
