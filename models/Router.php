@@ -28,7 +28,7 @@ class Router
     static protected $_routes = array();
     static protected $_params = array();
 
-        /**
+    /**
      * Pushes new route to Router - routes matching by historical added order.
      * @param type $path added to router by type '<controller>(/<action>(/<id>))'
      * @param type $filter array(
@@ -44,9 +44,36 @@ class Router
     }
 
 
+    /**
+     * Return values given by routing parameters such id
+     * @param string $key
+     * @return various value or NULL if not exist
+     */
     static public function param($key)
     {
         return key_exists($key, self::$_params) ? self::$_params[$key] : NULL;
+    }
+
+
+
+    /**
+     * Return values given by $_GET array
+     * @param string $key
+     */
+    static public function get($key)
+    {
+        return key_exists($key, self::$_get) ? self::$_get[$key] : NULL;
+    }
+
+
+
+    /**
+     * Return values given by $_POST array
+     * @param string $key
+     */
+    static public function post($key)
+    {
+        return key_exists($key, self::$_post) ? self::$_post[$key] : NULL;
     }
 
 
