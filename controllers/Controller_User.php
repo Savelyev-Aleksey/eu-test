@@ -20,5 +20,6 @@ class Controller_User extends Controller_Base
         {
             $user = User::authorize(Router::post('login'), Router::post('password'));
         }
+
     }
 }
