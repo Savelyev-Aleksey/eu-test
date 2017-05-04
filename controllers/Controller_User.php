@@ -16,10 +16,12 @@ class Controller_User extends Controller_Base
 
     public function action_login()
     {
+        self::$login = Router::post('login');
         if (isset(Router::post($key)))
         {
-            $user = User::authorize(Router::post('login'), Router::post('password'));
+            $user = User::authorize(self::$login, Router::post('password'));
         }
 
+        self::view('login');
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-require_once 'ORM.php';
-
 class User extends ORM
 {
   protected static $authorized_user = NULL;

@@ -1,14 +1,31 @@
 <?php
-error_reporting(-1);
+error_reporting(E_ALL);
 
-require_once 'models/DB.php';
-require_once 'models/User.php';
-require_once 'models/Router.php';
+ini_set('display_errors', 'on');
+
+spl_autoload_register(function ($class) {
+
+    $directories = array('system', 'models', 'controllers');
+    foreach ($directories as $dir)
+    {
+        $path = realpath($dir.'/'. $class. '.php');
+        if (is_file($path))
+        {
+            include_once $path;
+            return;
+        }
+    }
+    throw new Exception("Class ($class) not autoloaded");
+});
+
+
+date_default_timezone_set('Asia/Novosibirsk');
+setlocale(LC_ALL, 'en_US.utf-8');
+
 
 DB::init();
 
 $user = User::authorize('admin', 'admin');
-var_dump($user->is_authorized());
 
 Router::add_router('/', NULL, array('controller' => 'goods', 'action' => 'index'));
 
