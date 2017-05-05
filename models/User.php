@@ -103,11 +103,16 @@ class User extends ORM
     self::$authorized_user = NULL;
     if ($this->authorized)
       $this->authorized = false;
+
+
+    if (!session_status() == PHP_SESSION_ACTIVE)
+    {
+        session_start ();
+    }
     // close session
     // remove all session variables
-    session_unset();
-    // destroy the session
-    session_destroy();
+    $_SESSION = array();
+
     return true;
   }
 }

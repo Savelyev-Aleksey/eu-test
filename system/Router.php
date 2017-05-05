@@ -17,16 +17,17 @@ class Router
     const REGEX_KEY     = '<([a-zA-Z0-9_]++)>';
 
     // What can be part of a <segment> value
-    const REGEX_SEGMENT = '[^/.,;?\n]++';
+    const REGEX_SEGMENT = "[^/.,;?\n]++";
 
     // What must be escaped in the route regex
-    const REGEX_ESCAPE  = '[.\\+*?[^\\]${}=!|]';
+    const REGEX_ESCAPE  = '[.\\+*?\[^\]${}=!|]';
 
 
     static protected $_get = array();
     static protected $_post = array();
     static protected $_routes = array();
     static protected $_params = array();
+    static protected $_current_path = NULL;
 
     /**
      * Pushes new route to Router - routes matching by historical added order.
@@ -73,7 +74,7 @@ class Router
      */
     static public function post($key)
     {
-        return key_exists($key, self::$_post) ? self::$_post[$key] : NULL;
+        return array_key_exists($key, self::$_post) ? self::$_post[$key] : NULL;
     }
 
 
@@ -102,6 +103,7 @@ class Router
         $found = false;
         $path = NULL;
         $defaults = NULL;
+        $matches = [];
         foreach (self::$_routes as $route)
         {
             $path = $route[0];
@@ -128,11 +130,15 @@ class Router
             // Set the value for all matched keys
             $params[$key] = $value;
         }
+        unset($matches);
 
-        foreach ($defaults as $key => $value) {
-            if (!isset($params[$key]) OR $params[$key] === '') {
-                // Set default values for any key that was not matched
-                $params[$key] = $value;
+        if (is_array($defaults))
+        {
+            foreach ($defaults as $key => $value) {
+                if (!isset($params[$key]) OR $params[$key] === '') {
+                    // Set default values for any key that was not matched
+                    $params[$key] = $value;
+                }
             }
         }
 
@@ -159,7 +165,7 @@ class Router
         $names = explode('-', $name);
         foreach ($names as &$value)
         {
-            ucwords($value);
+            $value = ucfirst($value);
         }
         unset($value);
         return implode('_', $names);
@@ -172,34 +178,35 @@ class Router
     static public function runner()
     {
         if (count($_POST))
+        {
             foreach ($_POST as $key => $value)
             {
                 $key = self::input_filter($key);
                 self::$_post[$key] = self::input_filter($value);
             }
-
+        }
         if (count($_GET))
+        {
             foreach ($_GET as $key => $value)
             {
                 $key = self::input_filter($key);
                 self::$_get[$key] = self::input_filter($value);
             }
+        }
 
-        $path = self::input_filter($_SERVER['PATH_INFO']);
+        $path = array_key_exists('PATH_INFO', $_SERVER) ?
+                self::input_filter($_SERVER['PATH_INFO']) : '/';
 
-        $path = strtolower($path);
-
-        // Split to class name and action
-        $path = split('/', $path);
+        self::$_current_path = $path = strtolower($path);
 
         self::find_requested_path($path);
 
-        $controller_name = self::$_params['controller'];
-        $action_name = self::$_params['action'];
+        $controller_name = 'Controller_'. self::$_params['controller'];
+        $action_name = 'action_'. self::$_params['action'];
 
         $controller = new $controller_name();
 
-        $controller::$action_name();
+        $controller->$action_name();
     }
 
     /**
@@ -216,13 +223,12 @@ class Router
      *
      * @return  string
      * @uses    Route::REGEX_ESCAPE
-     * @uses    Route::REGEX_SEGMENT
      */
     protected static function compile($uri, array $regex = NULL)
     {
         // The URI should be considered literal except for keys and optional parts
         // Escape everything preg_quote would escape except for : ( ) < >
-        $expression = preg_replace('#' . Route::REGEX_ESCAPE . '#', '\\\\$0', $uri);
+        $expression = preg_replace('#' . Router::REGEX_ESCAPE . '#', "\\\\$0", $uri);
 
         if (strpos($expression, '(') !== FALSE)
         {
@@ -231,14 +237,14 @@ class Router
         }
 
         // Insert default regex for keys
-        $expression = str_replace(array('<', '>'), array('(?<', '>' . Route::REGEX_SEGMENT . ')'), $expression);
+        $expression = str_replace(array('<', '>'), array('(?<', '>'.Router::REGEX_SEGMENT.')'), $expression);
 
         if ($regex)
         {
             $search = $replace = array();
             foreach ($regex as $key => $value)
             {
-                $search[] = "<$key>" . Route::REGEX_SEGMENT;
+                $search[] = "<$key>" . Router::REGEX_SEGMENT;
                 $replace[] = "<$key>$value";
             }
 
@@ -250,11 +256,13 @@ class Router
     }
 
 
-    public static function redirect($rel_path)
+    public static function redirect($rel_path, $status = NULL)
     {
-        $http = $_SERVER['HTTPS'] ? 'https' : 'http';
+        $http = array_key_exists('HTTPS', $_SERVER) ? 'https' : 'http';
         $server = $_SERVER['SERVER_NAME'];
-        header("Location: $http://$server/$rel_path");
+        $ref = self::$_current_path;
+        header("Location: $http://$server/$rel_path?_ref=$ref", true, $status);
+        exit;
     }
 
 }

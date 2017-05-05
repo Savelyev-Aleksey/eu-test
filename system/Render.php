@@ -6,7 +6,6 @@
  */
 class Render
 {
-    protected static $content = NULL;
     private static $counter = 0;
 
     /**
@@ -14,14 +13,14 @@ class Render
      * @param string $view
      * @throws Exception if view file not found
      */
-    static public function view($view)
+    static public function view($view, $vars = [])
     {
         self::$counter++;
-        $model = strtolower(get_called_class());
+        $model = strtolower(substr(get_called_class(), 11));
 
-        self::$content = self::get_include_contents($model.'/'.$view);
+        $_content = self::get_include_contents($model.'/'.$view, $vars);
 
-        if (self::$content === false)
+        if ($_content === false)
             throw Exception ("File not found by Render: /views/$model/$view");
 
         self::$counter--;
@@ -30,7 +29,7 @@ class Render
         // Pop on top level in stack
         if (!self::$counter && isset(self::$template))
         {
-            include '/template/'. self::$template. '.php';
+            include '/views/template/'. self::$template. '.php';
         }
     }
 
@@ -41,12 +40,20 @@ class Render
      * @param string $filename relative path for view
      * @return file contest
      */
-    protected static function get_include_contents($filename)
+    protected static function get_include_contents($filename, $vars)
     {
-        if (is_file($filename)) {
-            ob_start(NULL, 0, PHP_OUTPUT_HANDLER_CLEANABLE);
-            include "/views/$filename.php";
-            return ob_get_clean();
+        $file = realpath("views/$filename.php");
+        if (is_file($file)) {
+            ob_start();
+            foreach ($vars as $key => $val)
+            {
+                $$key = $val;
+            }
+
+            include $file;
+            $buf = ob_get_contents();
+            ob_end_flush();
+            return $buf;
         }
         return false;
     }

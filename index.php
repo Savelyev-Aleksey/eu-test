@@ -27,9 +27,9 @@ DB::init();
 
 $user = User::authorize('admin', 'admin');
 
-Router::add_router('/', NULL, array('controller' => 'goods', 'action' => 'index'));
+Router::add_router('/', NULL, array('controller' => 'user', 'action' => 'index'));
 
 // add default router
-Router::add_router('<controller>(/<action>(/:id))', NULL, NULL);
+Router::add_router('/<controller>(/<action>(/<id>))', NULL, NULL);
 
 Router::runner();
