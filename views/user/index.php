@@ -1,5 +1,5 @@
 <p>
-    Welcome authorized user - <?php $user->login; ?>
+    Welcome authorized user - <?= $user->login; ?>
 </p>
 <?php
 
