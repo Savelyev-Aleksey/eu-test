@@ -117,7 +117,7 @@ class ORM
   {
     self::init();
     $where = array('id={id}', array('{id}' => $id));
-    $res = $this->select($where, '*', 'id ASC', 1);
+    $res = $this->select($where, '*', NULL, 1);
     if (!($row = $res->fetch_assoc()))
     {
       throw new Exception("Object not found with id = $id", 1);
@@ -130,7 +130,7 @@ class ORM
 
 
   // Find some records in DB, return array of ORM objects
-  public static function where($condition, $order = 'id ASC', $limit = NULL)
+  public static function where($condition, $order = 'id.ASC', $limit = NULL)
   {
     $objects = array();
     $res = self::select($condition, '*', $order, $limit);
@@ -144,7 +144,7 @@ class ORM
     return $objects;
   }
 
-  public static function all($order = 'id ASC', $limit = NULL)
+  public static function all($order = 'id.ASC', $limit = NULL)
   {
       return self::where(NULL, $order);
   }

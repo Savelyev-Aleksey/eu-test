@@ -185,8 +185,12 @@ class DB
     $fields = self::escape_fields($fields);
 
     // 4 safe order
-    if (!is_null($order))
-      $order = 'ORDER BY '. self::$mysqli->real_escape_string($order);
+    if (isset($order))
+    {
+      $order = explode('.', $order);
+      $order = 'ORDER BY "'. self::$mysqli->real_escape_string($order[0]). '" '.
+              self::$mysqli->real_escape_string($order[1]);
+    }
 
     // 5 safe limit
     if (!(is_int($limit) && $limit > 0))
