@@ -111,57 +111,97 @@ class DB
   }
 
 
-  /*
-    condition must set as array('filed={val-key}', array('{val-key}' => $value))
-    set only unique key in query - see doc strtr() more info.
-  */
+
+  /**
+   * condition must set as
+   * array('filed={val-key}', array('{val-key}' => $value))
+   * set only unique key in query - see PHP doc strtr() more info.
+   * @param array $condition - first element is where query,
+   * second - associative array of values
+   * @return string sql safe where statement WHERE ... or empty string for NULL
+   * @throws Exception if array set incorrect
+   */
   private static function escape_condition($condition)
   {
-    $where = '';
-    if (is_array($condition) && count($condition) == 2)
+    if (is_null($condition))
     {
-      $where = $condition[0];
-      $values = $condition[1];
-      foreach ($values as &$val)
-      {
-        if (is_string($val))
-          $val = '"'. self::$mysqli->real_escape_string($val). '"';
-        elseif (!is_numeric($val)) {
-          throw new Exception("Values in query must be only strings or numbers. ", 1);
-        }
-      }
-      unset($val);
-      $where = 'WHERE ' .strtr($where, $values);
+      return '';
     }
-    elseif (!is_null($condition)) {
+
+    if (!is_array($condition) || count($condition) != 2)
+    {
       throw new Exception("Query condition is set incorrect. ", 1);
     }
+
+    $where = $condition[0];
+    $values = $condition[1];
+    foreach ($values as &$val)
+    {
+      if (is_string($val))
+      {
+        $val = '"' . self::escape($val) . '"';
+      }
+      elseif (!is_numeric($val))
+      {
+        throw new Exception("Values in query must be only strings or numbers. ", 1);
+      }
+    }
+    unset($val);
+    $where = 'WHERE ' .strtr($where, $values);
+
     return $where;
   }
 
 
 
+  /**
+   * Check to safe select filer fields. SELECT `one`, `two` ...
+   * Gets array of fields ['one', 'two', 'three'] or 'one_field'.
+   * @param array or string $fields
+   * @return string
+   * @throws Exception if fields set incorrect array of fields or one field
+   */
   private static function escape_fields($fields)
   {
-    if (is_array($fields))
+    if ($fields === '*' || is_null($fields))
     {
-      foreach($fields as &$f)
-      {
-        $f = self::$mysqli->real_escape_string($f);
-      }
-      unset($f);
-      $fields = '"'. implode('","', $fields) .'"';
+      return '*';
     }
-    elseif (is_string($fields))
+
+    if (!is_array($fields))
     {
-      if ($fields !== '*')
-        $fields = self::$mysqli->real_escape_string($fields);
+      throw new Exception("fields must array or one string field, or *", 1);
     }
-    else
+
+    foreach($fields as &$f)
     {
-        throw new Exception("fields must array or one string field, or *", 1);
+      $f = '`'. self::escape($f). '`';
     }
-    return $fields;
+    unset($f);
+
+    return implode(',', $fields);
+  }
+
+
+
+  private static function escape_order($order)
+  {
+    if (is_null($order))
+    {
+      return '';
+    }
+
+    $fields = explode(',', $order);
+    $params = [];
+    foreach ($fields as $f)
+    {
+      $fo = explode('.', $f);
+      $name = '"'. self::escape(trim($fo[0])). '"';
+      $ord = self::escape(trim($fo[1]));
+      $params[] = $name. ' '. $ord;
+    }
+
+    return 'ORDER BY '. implode(',', $params);
   }
 
 
@@ -187,14 +227,14 @@ class DB
     // 4 safe order
     if (isset($order))
     {
-      $order = explode('.', $order);
-      $order = 'ORDER BY "'. self::$mysqli->real_escape_string($order[0]). '" '.
-              self::$mysqli->real_escape_string($order[1]);
+      $order = self::escape_order($order);
     }
 
     // 5 safe limit
     if (!(is_int($limit) && $limit > 0))
+    {
       $limit = self::QUERY_LIM;
+    }
 
     $limit = 'LIMIT '. $limit;
 
@@ -202,7 +242,9 @@ class DB
     $res = self::$mysqli->query($query);
 
     if ($res === false)
-      throw new Exception("Query was incorrect. ". $query, 1);
+    {
+      throw new Exception("Query was incorrect. " . $query, 1);
+    }
 
     return $res;
   }
