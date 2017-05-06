@@ -1,5 +1,29 @@
 <?php
 
+/*
+ * The MIT License
+ *
+ * Copyright 2017 aleksey.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 class ORM
 {
   // cache of class fields from database
@@ -39,7 +63,8 @@ class ORM
 
 
   // Alias for DB select but add current table name
-  protected static function select($condition = NULL, $fields = '*', $order = NULL, $limit = 1000)
+  protected static function select($condition = NULL, $fields = '*', $order = NULL,
+    $limit = NULL)
   {
     self::init();
     return DB::select(self::$table_name, $condition, $fields, $order, $limit);
@@ -51,7 +76,7 @@ class ORM
   {
     if (in_array($name, self::$columns))
     {
-      $this->_values[$name] = $value;      
+      $this->_values[$name] = $value;
     }
   }
 
@@ -105,9 +130,8 @@ class ORM
 
 
   // Find some records in DB, return array of ORM objects
-  public static function where($condition, $order = 'id ASC', $limit = 1000)
+  public static function where($condition, $order = 'id ASC', $limit = NULL)
   {
-    self::init();
     $objects = array();
     $res = self::select($condition, '*', $order, $limit);
     while ($row = $res->fetch_assoc())
@@ -119,4 +143,10 @@ class ORM
     $res->free();
     return $objects;
   }
+
+  public static function all($order = 'id ASC', $limit = NULL)
+  {
+      return self::where(NULL, $order);
+  }
+
 }
