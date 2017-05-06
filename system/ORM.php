@@ -27,12 +27,36 @@
 class ORM
 {
   // cache of class fields from database
-  protected static $columns = NULL;
-  protected static $table_name = NULL;
-  protected static $class_name = NULL;
+  protected static $columns = [];
   protected $_values = array();
   protected $_loaded = false;
 
+
+  static public function class_name()
+  {
+    return get_called_class();
+  }
+
+
+
+  static public function table_name()
+  {
+    return strtolower(get_called_class()) . 's';
+  }
+
+
+
+
+  static function init()
+  {
+    $class_name = self::class_name();
+    $table_name = self::table_name();
+    // Naming convention to many items
+    if (!array_key_exists($class_name, self::$columns))
+    {
+      self::$columns[$class_name] = DB::show_columns($table_name);
+    }
+  }
 
 
   function __construct($values)
@@ -47,34 +71,20 @@ class ORM
   }
 
 
-
-  static function init()
-  {
-    // Naming convention to many items
-    if (is_null(self::$table_name))
-    {
-      self::$class_name = get_called_class();
-      self::$table_name = strtolower(self::$class_name) . 's';
-    }
-
-    if (is_null(self::$columns))
-      self::$columns = DB::show_columns(self::$table_name);
-  }
-
-
   // Alias for DB select but add current table name
   protected static function select($condition = NULL, $fields = '*', $order = NULL,
     $limit = NULL)
   {
-    self::init();
-    return DB::select(self::$table_name, $condition, $fields, $order, $limit);
+    $init = self::init();
+    return DB::select(self::table_name(), $condition, $fields, $order, $limit);
   }
 
 
   // ORM basic function dynamically add options from DB by DB fileds naming or manually
   public function __set($name, $value)
   {
-    if (in_array($name, self::$columns))
+    $init = self::init();
+    if ( in_array( $name, self::$columns[self::class_name()] ) )
     {
       $this->_values[$name] = $value;
     }
@@ -115,15 +125,16 @@ class ORM
   // Find in DB object by id (PHP 7)
   public static function find(int $id)
   {
-    self::init();
+    $init = self::init();
     $where = array('id={id}', array('{id}' => $id));
-    $res = $this->select($where, '*', NULL, 1);
+    $res = self::select($where, '*', NULL, 1);
     if (!($row = $res->fetch_assoc()))
     {
       throw new Exception("Object not found with id = $id", 1);
     }
-    $user = new self::$class_name($row);
-    $this->_loaded = true;
+    $class_name = self::class_name();
+    $user = new $class_name($row);
+    $user->_loaded = true;
     $res->free();
     return $user;
   }
@@ -134,9 +145,10 @@ class ORM
   {
     $objects = array();
     $res = self::select($condition, '*', $order, $limit);
+    $class_name = self::class_name();
     while ($row = $res->fetch_assoc())
     {
-      $obj = new self::$class_name($row);
+      $obj = new $class_name($row);
       $obj->_loaded = true;
       $objects[] = $obj;
     }
