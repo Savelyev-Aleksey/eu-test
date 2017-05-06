@@ -25,8 +25,6 @@ setlocale(LC_ALL, 'en_US.utf-8');
 
 DB::init();
 
-$user = User::authorize('admin', 'admin');
-
 Router::add_router('/', NULL, array('controller' => 'user', 'action' => 'index'));
 
 // add default router
