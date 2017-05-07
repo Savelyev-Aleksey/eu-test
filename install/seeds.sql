@@ -13,7 +13,7 @@ VALUES (1, 'Potato'), (2, 'Apple'), (3,'Orange'), (4,'Kiwi'), (5,'Boat'), (6,'Bi
 
 
 -- Some reviews
-INSERT INTO `goods_reviews` (`user_id`, `good_id`, `rate`, `comment`)
+INSERT INTO `good_reviews` (`user_id`, `good_id`, `rate`, `comment`)
 VALUES
 (1,2,4,'Some good fresh potato'), 
 (2,4,5, 'Excelent Gavai Kiwi'), 

@@ -1,5 +1,5 @@
 -- Create users table
-CREATE TABLE `eu-test`.`users` (
+CREATE TABLE `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `login` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
@@ -7,14 +7,14 @@ CREATE TABLE `eu-test`.`users` (
   UNIQUE INDEX `login_UNIQUE` (`login` ASC));
 
 -- Create goods table
-CREATE TABLE `eu-test`.`goods` (
+CREATE TABLE `goods` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `name_UNIQUE` (`name` ASC));
 
 -- Create reviews table
-CREATE TABLE `eu-test`.`goods_reviews` (
+CREATE TABLE `good_reviews` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT NULL,
   `good_id` INT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE `eu-test`.`goods_reviews` (
   UNIQUE INDEX `user_good_id_UNIQUE` (`user_id` ASC, `good_id` ASC),
   CONSTRAINT `fk_review_users`
     FOREIGN KEY (`user_id`)
-    REFERENCES `eu-test`.`users` (`id`)
+    REFERENCES `users` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_review_goods`
     FOREIGN KEY (`good_id`)
-    REFERENCES `eu-test`.`goods` (`id`)
+    REFERENCES `goods` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION);
