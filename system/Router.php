@@ -280,12 +280,12 @@ class Router
     }
 
 
-    public static function redirect($rel_path, $status = NULL)
+    public static function redirect($rel_path, bool $add_ref = false, $status = NULL)
     {
         $http = array_key_exists('HTTPS', $_SERVER) ? 'https' : 'http';
         $server = $_SERVER['SERVER_NAME'];
-        $ref = self::$_current_path;
-        header("Location: $http://$server/$rel_path?_ref=$ref", true, $status);
+        $ref = $add_ref ? '?_ref='. self::$_current_path : '';
+        header("Location: $http://$server/$rel_path$ref", true, $status);
         exit;
     }
 
