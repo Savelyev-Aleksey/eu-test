@@ -147,8 +147,15 @@ class Form
 
     foreach ($options as $key => $value)
     {
-      $sel_opt = in_array($value, $selected) ? 'selected' : '';
-      $buf .= "<option $sel_opt value=\"$value\">$key</option>". PHP_EOL;
+      $sel_opt = in_array($value, $selected) ? ' selected' : '';
+      if ($value === NULL)
+      {
+        $buf = $buf.'<option'.$sel_opt.'></option>'.PHP_EOL;
+      }
+      else
+      {
+        $buf = $buf.'<option'.$sel_opt.' value="'.$value.'">'.$key.'</option>'.PHP_EOL;
+      }
     }
 
     $buf .= '</select>'. PHP_EOL;
