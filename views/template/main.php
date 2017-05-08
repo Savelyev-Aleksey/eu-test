@@ -23,11 +23,17 @@
                 </button>
               </div>
               <div class="collapse navbar-collapse" id="main-navbar">
-                <?= Form::open(User::get_authorized_user(), ['method' => 'post',
+                <?php
+                  $user = User::get_authorized_user();
+                  if (isset($user)):
+                ?>
+                <?= Form::open($user, ['method' => 'post',
                     'action' => '/user/logout', 'class' => 'navbar-form navbar-right']);
                 ?>
+                <?= Form::hidden('logout', true); ?>
                 <?= Form::submit('Logout', ['class' => 'btn btn-default']); ?>
                 <?= Form::close(); ?>
+                <?php endif; ?>
               </div>
             </div>
 
