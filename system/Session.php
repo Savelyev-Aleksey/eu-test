@@ -83,7 +83,9 @@ class Session
    */
   protected static function new_token()
   {
-    $list = explode('', time(). (time()*5));
+    $p1 = dechex(time()*3);
+    $p2 = dechex(time()*5);
+    $list = str_split($p1. $p2);
 
     shuffle($list);
 
