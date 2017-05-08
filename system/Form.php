@@ -137,7 +137,7 @@ class Form
     {
       if (is_null($selected))
       {
-        $selected = isset(self::$obj) ? self::$obj->$name : [];
+        $selected = isset(self::$obj) ? [self::$obj->$name] : [];
       }
       else
       {
@@ -178,7 +178,7 @@ class Form
       $options['type'] = 'text';
     }
 
-    if ($options['placeholder'] === true)
+    if (array_key_exists('placeholder', $options) && $options['placeholder'] === true)
     {
       $title = $name;
       $options['placeholder'] = ucfirst($title);
@@ -272,7 +272,7 @@ class Form
   }
 
 
-  public static function textarea($name, array $opions = [])
+  public static function textarea($name, array $options = [])
   {
     if (array_key_exists('value', $options))
     {
