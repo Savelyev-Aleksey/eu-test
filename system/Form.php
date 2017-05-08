@@ -30,9 +30,84 @@
  */
 class Form
 {
+
+  protected static $obj = NULL;
+
+
+
+  /**
+   * Glue options in form (id="login" class="form-control").
+   * Prepend space. So no need additional space.
+   * @param array $options
+   * @return string
+   */
+  protected static function glue(array $options)
+  {
+    $options_buf = '';
+    foreach ($options as $key => $option)
+    {
+      $options_buf .= ' ' . $key . '="' . $option . '"';
+    }
+    return $options_buf;
+  }
+
+
+
+  public static function open($object, array $options = [])
+  {
+    if (!is_null(self::$obj))
+    {
+      throw new Exception('Last form not closed. Please check code.');
+    }
+
+    // Object not set, array of options given
+    if (is_array($object))
+    {
+      $options = $object;
+    }
+    else
+    {
+      self::$obj = $object;
+    }
+
+    if (!array_key_exists('id', $options) && isset(self::$obj))
+    {
+      $options['id'] = strtr(self::$obj->class_name(), ['\\' => '-', '_' => '-']);
+    }
+
+    if (!array_key_exists('method', $options))
+    {
+      $options['method'] = 'get';
+    }
+
+    if (array_key_exists('multipart', $options))
+    {
+      if ($options['multipart'] === true)
+      {
+        $options['enctype'] = 'multipart/form-data';
+      }
+      unset($options['multipart']);
+    }
+
+    $attr = self::glue($options);
+
+    return '<form'. $attr. '>'. PHP_EOL;
+  }
+
+
+
+  public static function close()
+  {
+    self::$obj = NULL;
+    return '</form>'. PHP_EOL;
+  }
+
+
   public static function select($name, array $options = [], $selected = NULL, array $attributes = NULL)
   {
-    $buf = "<select name=\"$name\">". PHP_EOL;
+    $attr = self::glue($attributes);
+
+    $buf = "<select name=\"$name\"$attr>". PHP_EOL;
 
     if (!is_array($selected))
     {
@@ -56,4 +131,120 @@ class Form
 
     return $buf;
   }
+
+
+
+  public static function label($for, $title, array $options = [])
+  {
+    $options_buf = '';
+
+    return "<label for=\"$for\"$options_buf>$title</label>". PHP_EOL;
+  }
+
+
+
+  public static function input($name, array $options = [])
+  {
+    if (!array_key_exists('id', $options))
+    {
+      $options['id'] = $name;
+    }
+    if (!array_key_exists('type', $options))
+    {
+      $options['type'] = 'text';
+    }
+
+    if ($options['placeholder'] === true)
+    {
+      $title = $name;
+      $options['placeholder'] = ucfirst($title);
+      unset($title);
+    }
+
+    if (array_key_exists('value', $options))
+    {
+      if (is_null($options['value']))
+      {
+        unset($options['value']);
+      }
+    }
+    else
+    {
+      if (self::$obj === NULL)
+      {
+        throw new Exception('Object not set in form and value not given.');
+      }
+      $options['value'] = self::$obj->$name;
+    }
+
+    $attr = self::glue($options);
+
+    return "<input name=\"$name\"$attr>". PHP_EOL;
+  }
+
+
+
+  public static function hidden(string $name, $value = NULL, array $options = [])
+  {
+    if (!isset($value) && isset(self::$obj))
+    {
+      $options['type'] = 'hidden';
+      return self::input($name, $options);
+    }
+    else
+    {
+      $options['value'] = $value;
+    }
+
+    $attr = self::glue($options);
+
+    return "<input type=\"hidden\" name=\"$name\"$attr>". PHP_EOL;
+  }
+
+
+
+  public static function password($name, array $options = [])
+  {
+    $options['type'] = 'password';
+    return self::input($name, $options);
+  }
+
+
+
+  public static function email($name, array $options = [])
+  {
+    $options['type'] = 'email';
+    return self::input($name, $options);
+  }
+
+
+
+  public static function number($name, array $options = [])
+  {
+    $options['type'] = 'numeric';
+    return self::input($name, $options);
+  }
+
+
+
+  public static function date($name, array $options = [])
+  {
+    $options['type'] = 'date';
+    return self::input($name, $options);
+  }
+
+
+
+  public static function today($name, array $options = [])
+  {
+    $options['type'] = 'date';
+    if (!array_key_exists('value', $options))
+    {
+      $val = isset(self::$obj) ? self::$obj->$name : NULL;
+      $options['value'] = isset($val) ? $val : date('Y-m-d');
+    }
+    return self::input($name, $options);
+  }
+
+
 }
