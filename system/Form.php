@@ -98,7 +98,15 @@ class Form
 
     $attr = self::glue($options);
 
-    return '<form'. $attr. '>'. PHP_EOL;
+    $form = '<form'. $attr. '>'. PHP_EOL;
+
+    // Add CSRF token
+    if (strcasecmp($options['method'],'post') === 0)
+    {
+      $form .= self::hidden(Session::token_key(), Session::get_token());
+    }
+
+    return $form;
   }
 
 

@@ -33,7 +33,7 @@
 class Session
 {
   protected static $life_time = 60*60*24; // one day
-
+  protected static $csrf_key ='_csrf';
 
 
   public static function get($key)
@@ -70,5 +70,78 @@ class Session
     // remove all session variables
     $_SESSION = [];
     session_write_close();
+  }
+
+
+  /**
+   * CSRF method generates random token
+   * @return string hash
+   */
+  protected static function new_token()
+  {
+    $list = explode('', time(). (time()*5));
+
+    shuffle($list);
+
+    return hash('sha1', implode('', $list));
+  }
+
+
+  /**
+   * Check Session on POST query and check csrf token must be same for session
+   * If token not set generates new.
+   * @return boolean FALSE - if POST are sent, but token not setup.
+   * FALSE - if token from POST form and Session token not compared.
+   * TRUE - if not post query or Tokens are same.
+   */
+  public static function check_csrf_token()
+  {
+    $token = Session::get(self::$csrf_key);
+
+    if (count($_POST))
+    {
+      $post_token = $_POST[self::$csrf_key];
+      if ($post_token === NULL)
+      {
+        return false;
+      }
+      unset($_POST[self::$csrf_key]);
+
+      if (!strcmp($token, $post_token) !== 0)
+      {
+        return false;
+      }
+      // Compared successfully - clear old token
+      $token = NULL;
+    }
+
+    if ($token === NULL)
+    {
+      Session::set(self::$csrf_key, self::new_token());
+    }
+    return true;
+  }
+
+
+  /**
+   * Gets existing token for Form helper.
+   * If token not set, generates new
+   * @return string exist or new saved token
+   */
+  public static function get_token()
+  {
+    $token = Session::get(self::$csrf_key);
+    if ($token === NULL)
+    {
+      $token = self::new_token();
+      Session::set(self::$csrf_key, $token);
+    }
+    return $token;
+  }
+
+
+  public static function token_key()
+  {
+    return self::$csrf_key;
   }
 }
