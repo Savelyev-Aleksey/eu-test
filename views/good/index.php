@@ -2,20 +2,25 @@
 
 if (isset($goods) && is_array($goods)):
 ?>
-<div class="goods">
+<div class="goods row">
 <?php
   foreach ($goods as $good):
 ?>
-  <section class="good-elem">
-    <header><a href="/good/show/<?=$good->id;?>"><?= $good->name; ?></a></header>
-<?php
-    $review = $good->good_reviews(["user_id={uid}",['{uid}' => $user->id]]);
-    $review = count($review) ? $review[0] : new Good_Review(['user_id' => $user->id,
-        'good_id' => $good->id]);
+  <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+    <section class="good-elem panel panel-info">
+      <header class="panel-heading">
+        <a href="/good/show/<?=$good->id;?>"><?= $good->name; ?></a>
+      </header>
+      <div class="panel-body">
+ <?php
+      $review = $good->good_reviews(["user_id={uid}",['{uid}' => $user->id]]);
+      $review = count($review) ? $review[0] : new Good_Review(['good_id' => $good->id]);
 
-    echo Render::view('_review_form',['review' => $review]);
-    ?>
-  </section>
+      Render::view('good/_review_form',['review' => $review]);
+      ?>
+      </div>
+    </section>
+  </div>
 <?php
   endforeach;
 ?>
