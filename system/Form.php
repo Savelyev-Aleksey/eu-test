@@ -129,6 +129,11 @@ class Form
 
   public static function select($name, array $options = [], $selected = NULL, array $attributes = NULL)
   {
+    if (!array_key_exists('id', $attributes))
+    {
+      $attributes['id'] = $name;
+    }
+
     $attr = self::glue($attributes);
 
     $buf = "<select name=\"$name\"$attr>". PHP_EOL;
@@ -167,8 +172,7 @@ class Form
 
   public static function label($for, $title, array $options = [])
   {
-    $options_buf = '';
-
+    $options_buf = self::glue($options);
     return "<label for=\"$for\"$options_buf>$title</label>". PHP_EOL;
   }
 
@@ -296,7 +300,7 @@ class Form
       $opions['id'] = $name;
     }
 
-    $attr = self::glue($opions);
+    $attr = self::glue($options);
 
     return "<textarea name=\"$name\" $attr>$val</textarea>". PHP_EOL;
   }
