@@ -24,7 +24,7 @@ setlocale(LC_ALL, 'en_US.utf-8');
 
 DB::init();
 
-Router::add_router('/', NULL, array('controller' => 'user', 'action' => 'index'));
+Router::add_router('/', NULL, array('controller' => 'good', 'action' => 'index'));
 
 // add default router
 Router::add_router('/<controller>(/<action>(/<id>))', NULL, NULL);
