@@ -45,7 +45,9 @@ class Render
         $_content = self::get_include_contents($model.'/'.$view, $vars);
 
         if ($_content === false)
-            throw Exception ("File not found by Render: /views/$model/$view");
+        {
+          throw new Exception("File not found by Render: /views/$model/$view");
+        }
 
         self::$counter--;
 
