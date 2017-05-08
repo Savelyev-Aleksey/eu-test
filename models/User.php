@@ -31,16 +31,13 @@ class User extends ORM
   */
   public static function get_authorized_user()
   {
-    session_start([
-      'cookie_lifetime' => 86400,
-      'read_and_close'  => true,
-    ]);
+    $uid = Session::get('uid');
 
-    if (!isset(self::$authorized_user) && array_key_exists('uid', $_SESSION))
+    if (!isset(self::$authorized_user) && isset($uid))
     {
         try
         {
-          self::$authorized_user = User::find($_SESSION['uid']);
+          self::$authorized_user = User::find($uid);
         }
         catch (Exception $e)
         {
@@ -85,11 +82,7 @@ class User extends ORM
 
     self::$authorized_user = $user;
 
-    session_start([
-      'cookie_lifetime' => 86400,
-    ]);
-    $_SESSION["uid"] = $user->id;
-    session_write_close();
+    Session::set('uid', $user->id);
 
     return $user;
   }
@@ -102,14 +95,7 @@ class User extends ORM
     if ($this->authorized)
       $this->authorized = false;
 
-
-    if (!session_status() == PHP_SESSION_ACTIVE)
-    {
-        session_start ();
-    }
-    // close session
-    // remove all session variables
-    $_SESSION = array();
+    Session::destroy();
 
     return true;
   }
