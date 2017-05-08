@@ -206,6 +206,7 @@ class Form
   public static function password($name, array $options = [])
   {
     $options['type'] = 'password';
+    $options['value'] = NULL; // clear value if data sent incorrect
     return self::input($name, $options);
   }
 
