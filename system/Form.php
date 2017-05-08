@@ -113,7 +113,7 @@ class Form
     {
       if (is_null($selected))
       {
-        $selected = [];
+        $selected = isset(self::$obj) ? self::$obj->$name : [];
       }
       else
       {
