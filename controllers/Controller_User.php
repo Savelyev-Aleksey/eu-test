@@ -47,4 +47,18 @@ class Controller_User extends Controller_Base
     self::view('login', ['login' => $login]);
   }
 
+
+
+  public function action_logout()
+  {
+    $logout = Router::post('logout');
+
+    if (isset($logout))
+    {
+      User::get_authorized_user()->logout();
+      Router::redirect('/');
+      exit();
+    }
+  }
+
 }
