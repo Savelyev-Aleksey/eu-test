@@ -55,7 +55,7 @@ class Render
     if (!--self::$counter)
     {
       $_content = ob_get_contents();
-      ob_end_clean();
+      ob_clean();
       // Load template after all loaded views
       if (isset(static::$template))
       {
@@ -66,6 +66,9 @@ class Render
       {
         echo $_content;
       }
+      $result = ob_get_contents();
+      ob_end_clean();
+      echo $result;
     }
   }
 
