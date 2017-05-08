@@ -23,9 +23,10 @@ class Controller_User extends Controller_Base
   public function action_index()
   {
     if (!self::is_authorized())
+    {
       Router::redirect('user/login');
-    $user = User::get_authorized_user();
-    self::view('index', ['user' => $user]);
+    }
+    Router::redirect('/');
   }
 
 
@@ -38,7 +39,9 @@ class Controller_User extends Controller_Base
     {
       $user = User::authorize($login, Router::post('password'));
       if ($user->is_authorized())
-        Router::redirect('user/index');
+      {
+        Router::redirect('/');
+      }
     }
 
     self::view('login', ['login' => $login]);
