@@ -2,14 +2,11 @@
 
 class User extends ORM
 {
+
   protected static $has_many = ['Good_Review'];
-
-
   protected static $authorized_user = NULL;
   protected $authorized = false;
   protected $auth_error = NULL;
-
-
 
   // Test func for manually set adm pass
   public static function get_hash_pass($pass = 'admin')
@@ -17,37 +14,38 @@ class User extends ORM
     return password_hash($pass, PASSWORD_DEFAULT);
   }
 
-
   // Check - is user authorized
   public function is_authorized()
   {
     return $this->authorized;
   }
 
-
   /*
-  Return current instance of auth user.
-  If session exist trying to autoload user.
-  */
+    Return current instance of auth user.
+    If session exist trying to autoload user.
+   */
+
   public static function get_authorized_user()
   {
-    $uid = Session::get('uid');
-
-    if (!isset(self::$authorized_user) && isset($uid))
+    if (self::$authorized_user === NULL)
     {
-        try
-        {
-          self::$authorized_user = User::find($uid);
-        }
-        catch (Exception $e)
-        {
-          $this->logout();
-        }
+      $uid = Session::get('uid');
+      if (!isset($uid))
+      {
+        return NULL;
+      }
+
+      try
+      {
+        self::$authorized_user = User::find($uid);
+      }
+      catch (Exception $e)
+      {
+        $this->logout();
+      }
     }
     return self::$authorized_user;
   }
-
-
 
   /**
    * Static function to authorize new logining user.
@@ -87,7 +85,6 @@ class User extends ORM
     return $user;
   }
 
-
   // logout user and close current session
   public function logout()
   {
@@ -99,4 +96,5 @@ class User extends ORM
 
     return true;
   }
+
 }
