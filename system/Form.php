@@ -111,7 +111,7 @@ class Form
 
 
 
-  public function submit($text, array $options = [])
+  public static function submit($text, array $options = [])
   {
     $attr = self::glue($options);
     return "<button type=\"submit\"$attr>$text</button>". PHP_EOL;
