@@ -25,21 +25,28 @@
  */
 
 /**
- * Helper static class
+ * Helper static class to build form based on current object set in open.
+ * Stores in open Form session current object and gets from values.
  *
+ * To start build call Form::open(...);
+ * Work with fields Form::input('comment', []);
+ * To end session close form Form::close();
  */
 class Form
 {
 
+  /**
+   * @var mixed Object stored for open form session to gets values.
+   */
   protected static $obj = NULL;
 
 
 
   /**
-   * Glue options in form (id="login" class="form-control").
+   * Glue options in form ( id="login" class="form-control").
    * Prepend space. So no need additional space.
-   * @param array $options
-   * @return string
+   * @param array $options to implode
+   * @return string ready attr string
    */
   protected static function glue(array $options)
   {
@@ -101,6 +108,15 @@ class Form
     self::$obj = NULL;
     return '</form>'. PHP_EOL;
   }
+
+
+
+  public function submit($text, array $options = [])
+  {
+    $attr = self::glue($options);
+    return "<button type=\"submit\"$attr>$text</button>". PHP_EOL;
+  }
+
 
 
   public static function select($name, array $options = [], $selected = NULL, array $attributes = NULL)
@@ -248,4 +264,25 @@ class Form
   }
 
 
+  public static function textarea($name, array $opions = [])
+  {
+    if (array_key_exists('value', $options))
+    {
+      $val = $opions['value'];
+      unset($opions['value']);
+    }
+    else
+    {
+      $val = isset(self::$obj) ? self::$obj->$name : NULL;
+    }
+
+    if (!array_key_exists('id', $options))
+    {
+      $opions['id'] = $name;
+    }
+
+    $attr = self::glue($opions);
+
+    return "<textarea name=\"$name\" $attr>$val</textarea>". PHP_EOL;
+  }
 }
