@@ -284,6 +284,7 @@ class Router
     {
         $http = array_key_exists('HTTPS', $_SERVER) ? 'https' : 'http';
         $server = $_SERVER['SERVER_NAME'];
+        if ($rel_path === '/') $rel_path = '';
         $ref = $add_ref ? '?_ref='. self::$_current_path : '';
         header("Location: $http://$server/$rel_path$ref", true, $status);
         exit;
