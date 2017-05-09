@@ -258,8 +258,9 @@ class ORM
 
     // For example User -> user_id
     $filed_id = strtolower($ref_class) . '_id';
-    $where = ["id=\{$filed_id\}", ["\{$filed_id\}" => $this->$field_id]];
-    return $ref_class::where($where)[0];
+    $id = $this->{$filed_id};
+    $where_array = ["id=\{$filed_id\}", ["\{$filed_id\}" => $id]];
+    return $ref_class::where($where_array)[0];
   }
 
 
@@ -287,9 +288,9 @@ class ORM
       }
     }
 
-    if (isset(static::$belong_to))
+    if (isset(static::$belongs_to))
     {
-      foreach (static::$belong_to as $search)
+      foreach (static::$belongs_to as $search)
       {
         // belongs to compare in one plural - User, not Users
         if (strcasecmp($search, $table_name) == 0)
