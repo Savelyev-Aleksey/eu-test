@@ -29,4 +29,5 @@ Router::add_router('/', NULL, array('controller' => 'good', 'action' => 'index')
 // add default router
 Router::add_router('/<controller>(/<action>(/<id>))', NULL, NULL);
 
-Router::runner();
+
+Request::start();

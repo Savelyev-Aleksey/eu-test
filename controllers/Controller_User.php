@@ -9,6 +9,8 @@ class Controller_User extends Controller_Base
 
   protected static $template = 'main';
 
+
+
   /**
    * Check that exist session for user before get access in other methods
    * @return type true - if user authorized
@@ -24,23 +26,27 @@ class Controller_User extends Controller_Base
   {
     if (!self::is_authorized())
     {
-      Router::redirect('user/login');
+      Request::redirect('user/login');
     }
-    Router::redirect('/');
+    Request::redirect('/');
   }
 
 
 
   public function action_login()
   {
-    $login = Router::post('login');
-
-    if (isset($login))
+    $login = NULL;
+    if (Request::is_post())
     {
-      $user = User::authorize($login, Router::post('password'));
-      if ($user->is_authorized())
+      $login = Request::post('login');
+
+      if (isset($login))
       {
-        Router::redirect('/');
+        $user = User::authorize($login, Request::post('password'));
+        if ($user->is_authorized())
+        {
+          Request::redirect('/');
+        }
       }
     }
 
@@ -51,7 +57,7 @@ class Controller_User extends Controller_Base
 
   public function action_logout()
   {
-    $logout = Router::post('logout');
+    $logout = Request::post('logout');
 
     if (isset($logout))
     {
@@ -60,7 +66,7 @@ class Controller_User extends Controller_Base
       {
         $user->logout();
       }
-      Router::redirect('/');
+      Request::redirect('/');
       exit();
     }
   }

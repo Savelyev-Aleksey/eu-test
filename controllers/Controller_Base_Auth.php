@@ -28,7 +28,7 @@ class Controller_Base_Auth extends Controller_Base
   {
     if (!self::is_authorized())
     {
-      Router::redirect('user/login');
+      Request::redirect('user/login');
     }
 
     if (!Session::check_csrf_token())

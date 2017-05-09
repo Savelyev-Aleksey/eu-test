@@ -26,9 +26,15 @@ class Controller_Good extends Controller_Base_Auth
     }
     catch (Exception $ex)
     {
-      Router::redirect('public/404.php');
+      Request::redirect('public/404.php');
     }
     self::view('show', ['good' => $good]);
+  }
+
+
+
+  public function action_review()
+  {
   }
 
 }
