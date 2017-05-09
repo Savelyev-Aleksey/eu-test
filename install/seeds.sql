@@ -15,7 +15,12 @@ VALUES (1, 'Potato'), (2, 'Apple'), (3,'Orange'), (4,'Kiwi'), (5,'Boat'), (6,'Bi
 -- Some reviews
 INSERT INTO `good_reviews` (`user_id`, `good_id`, `rate`, `comment`)
 VALUES
-(1,2,4,'Some good fresh potato'), 
-(2,4,5, 'Excelent Gavai Kiwi'), 
-(4,6,2,'Cheap China bike. Mdahhh');
+(1,1,4,'Some good fresh potato'), 
+(2,1,5,'Excelent fresh potato. Fast delivery.'), 
+(4,1,3,'Some good peaces, but other not good. Delivery fast at time.'), 
+(1,4,5,'Very and very nice kiwi. All loves kiwi. Awesome fast delivry like it. Recomend.'),
+(2,4,4,'Yes, kiwi really delicious. Yep delivry vey fast. Recomend.'),
+(2,4,5,'Excelent Gavai Kiwi. How they such fast moving? Great.'), 
+(4,6,2,'Cheap China bike. Mdahhh'),
+(1,3,NULL,'Where they storing oranges? look not good. No one start gues... Bad.');
 
