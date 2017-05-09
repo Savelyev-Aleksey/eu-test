@@ -55,7 +55,11 @@ class Controller_User extends Controller_Base
 
     if (isset($logout))
     {
-      User::get_authorized_user()->logout();
+      $user = User::get_authorized_user();
+      if ($user)
+      {
+        $user->logout();
+      }
       Router::redirect('/');
       exit();
     }
