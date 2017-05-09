@@ -38,9 +38,20 @@
             </div>
 
           </nav>
-
         </header>
-        <div class="container"><?= $_content; ?>
+        <div class="container">
+          <?php
+            $flash = Session::flash();
+            if (isset($flash)): ?>
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+              <?= $flash ?>
+            </div>
+          <?php
+            endif; ?>
+          
+          <?= $_content; ?>
         </div>
         <footer>
             Some footer

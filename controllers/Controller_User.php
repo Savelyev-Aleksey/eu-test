@@ -45,6 +45,7 @@ class Controller_User extends Controller_Base
         $user = User::authorize($login, Request::post('password'));
         if ($user->is_authorized())
         {
+          Session::flash("{$user->login}, welcome on site.");
           Request::redirect('/');
         }
       }
@@ -65,6 +66,7 @@ class Controller_User extends Controller_Base
       if ($user)
       {
         $user->logout();
+        Session::flash("{$user->login}, you are logged out. See you.");
       }
       Request::redirect('/');
       exit();

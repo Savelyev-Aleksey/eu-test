@@ -32,8 +32,10 @@
  */
 class Session
 {
-  protected static $life_time = 60*60*24; // one day
-  protected static $csrf_key ='_csrf';
+
+  protected static $life_time = 60 * 60 * 24; // one day
+  protected static $csrf_key = '_csrf';
+
 
 
   public static function get($key)
@@ -64,6 +66,40 @@ class Session
   }
 
 
+
+  public static function free($key)
+  {
+    if (session_status() !== PHP_SESSION_ACTIVE)
+    {
+      session_start(['cookie_lifetime' => self::$life_time]);
+    }
+    if (array_key_exists($key, $_SESSION))
+    {
+      unset($_SESSION[$key]);
+    }
+    session_write_close();
+  }
+
+
+
+  public static function pop($key)
+  {
+    if (session_status() !== PHP_SESSION_ACTIVE)
+    {
+      session_start(['cookie_lifetime' => self::$life_time]);
+    }
+    $value = NULL;
+    if (array_key_exists($key, $_SESSION))
+    {
+      $value = $_SESSION[$key];
+      unset($_SESSION[$key]);
+    }
+    session_write_close();
+    return $value;
+  }
+
+
+
   public static function destroy()
   {
     if (session_status() != PHP_SESSION_ACTIVE)
@@ -77,20 +113,22 @@ class Session
   }
 
 
+
   /**
    * CSRF method generates random token
    * @return string hash
    */
   protected static function new_token()
   {
-    $p1 = dechex(time()*3);
-    $p2 = dechex(time()*5);
-    $list = str_split($p1. $p2);
+    $p1 = dechex(time() * 3);
+    $p2 = dechex(time() * 5);
+    $list = str_split($p1 . $p2);
 
     shuffle($list);
 
     return hash('sha1', implode('', $list));
   }
+
 
 
   /**
@@ -129,6 +167,7 @@ class Session
   }
 
 
+
   /**
    * Gets existing token for Form helper.
    * If token not set, generates new
@@ -146,8 +185,21 @@ class Session
   }
 
 
+
   public static function token_key()
   {
     return self::$csrf_key;
   }
+
+
+
+  public static function flash(string $text = NULL)
+  {
+    if ($text === NULL)
+    {
+      return self::pop('_flash');
+    }
+    self::set('_flash', $text);
+  }
+
 }
