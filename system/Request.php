@@ -30,15 +30,14 @@
  */
 class Request
 {
+
   protected static $_method = NULL;
   static protected $_get = array();
   static protected $_post = array();
 
 
 
-
-
-    /**
+  /**
    * Return values given by $_GET array
    * @param string $key
    */
@@ -46,6 +45,8 @@ class Request
   {
     return array_key_exists($key, self::$_get) ? self::$_get[$key] : NULL;
   }
+
+
 
   /**
    * Return values given by $_POST array
@@ -56,6 +57,8 @@ class Request
     return array_key_exists($key, self::$_post) ? self::$_post[$key] : NULL;
   }
 
+
+
   /**
    * Escape input from all global arrays $_GET, $_POST
    * replace HTML spec chars on escaped entities.
@@ -64,7 +67,7 @@ class Request
    */
   static public function input_filter(string $value): string
   {
-    return htmlspecialchars( trim($value) );
+    return htmlspecialchars(trim($value));
   }
 
 
@@ -99,13 +102,13 @@ class Request
 
 
   /**
-   *
    * @return string name of current method or NULL if not init
    */
   public static function get_method(): string
   {
     return self::$_method;
   }
+
 
 
   public static function is_post(): bool
@@ -131,6 +134,46 @@ class Request
     $ref = $add_ref ? '?_ref=' . self::$_current_path : '';
     header("Location: $http://$server/$rel_path$ref", true, $status);
     exit;
+  }
+
+
+
+  /**
+   * return array of values to set in Object.
+   * if set type 'all' Get values from get first, after from post
+   * @param string $type get, post or all - where get values
+   * @param array $fields
+   * @return array of values from request
+   */
+  static public function filter(string $type, array $fields): array
+  {
+    if (!in_array($type, ['get', 'post', 'all']))
+    {
+      return NULL;
+    }
+
+    $values = [];
+    if ($type === 'get' || $type === 'all')
+    {
+      foreach ($fields as $key)
+      {
+        $values[$key] = self::get($key);
+      }
+    }
+
+    if ($type === 'post' || $type === 'all')
+    {
+      foreach ($fields as $key)
+      {
+        $val = self::post($key);
+        if (array_key_exists($key, $values) && is_null($val))
+        {
+          continue;
+        }
+        $values[$key] = $val;
+      }
+    }
+    return $values;
   }
 
 }
