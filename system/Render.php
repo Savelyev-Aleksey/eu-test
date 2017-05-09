@@ -93,4 +93,10 @@ class Render
     return false;
   }
 
+
+
+  public static function out(string $value): string
+  {
+    return htmlspecialchars($value);
+  }
 }
