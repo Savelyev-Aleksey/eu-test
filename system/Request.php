@@ -41,7 +41,7 @@ class Request
    * Return values given by $_GET array
    * @param string $key
    */
-  static public function get($key): string
+  static public function get($key)
   {
     return array_key_exists($key, self::$_get) ? self::$_get[$key] : NULL;
   }
@@ -52,7 +52,7 @@ class Request
    * Return values given by $_POST array
    * @param string $key
    */
-  static public function post($key): string
+  static public function post($key)
   {
     return array_key_exists($key, self::$_post) ? self::$_post[$key] : NULL;
   }
