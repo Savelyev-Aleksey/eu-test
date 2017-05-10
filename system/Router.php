@@ -71,7 +71,7 @@ class Router
    */
   static public function param($key): string
   {
-    return aray_key_exists($key, self::$_params) ? self::$_params[$key] : NULL;
+    return array_key_exists($key, self::$_params) ? self::$_params[$key] : NULL;
   }
 
 
