@@ -151,7 +151,7 @@ class Session
       }
       unset($_POST[self::$csrf_key]);
 
-      if (!strcmp($token, $post_token) !== 0)
+      if (strcmp($token, $post_token) !== 0)
       {
         return false;
       }
