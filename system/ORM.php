@@ -26,12 +26,16 @@
 
 class ORM
 {
+
   // cache of class fields from database
   protected static $columns = [];
   // Array of object properties - used in __get __set methods
-  protected $_values = array();
+  protected $_values = [];
+  protected $_toched_values = [];
   // Marker for loaded from DB object
   protected $_loaded = false;
+  protected $_valid = false;
+  protected $_last_error = NULL;
 
 
 
@@ -56,7 +60,6 @@ class ORM
   {
     return strtolower(get_called_class()) . 's';
   }
-
 
 
 
@@ -88,12 +91,82 @@ class ORM
   }
 
 
-  // Alias for DB select but add current table name
-  protected static function select($condition = NULL, $fields = '*', $order = NULL,
-    $limit = NULL)
+
+  /**
+   * Alias for DB select with added current table name
+   * @param type $condition
+   * @param type $fields
+   * @param type $order
+   * @param type $limit
+   * @return MySQLi query result object
+   */
+  protected static function select($condition = NULL, $fields = '*', $order = NULL, $limit = NULL)
   {
     self::init();
     return DB::select(self::table_name(), $condition, $fields, $order, $limit);
+  }
+
+
+
+  /**
+   * Try to insert newly created object in DB.
+   * Setup ORM::_last_error to error string.
+   * @return bool true if stored in DB false if fails.
+   */
+  protected function insert(): bool
+  {
+    self::init();
+    try
+    {
+      $result = DB::insert(self::table_name(), $this->_values);
+    }
+    catch (Exception $ex)
+    {
+      $this->_last_error = $ex->getMessage();
+      return false;
+    }
+
+    $values = $result->fetch_assoc();
+    $result->free();
+
+    $this->set_values($values);
+    $this->_loaded = true;
+    return true;
+  }
+
+
+
+  protected function update(): bool
+  {
+    self::init();
+    if (!count($this->_toched_values))
+    {
+      return true;
+    }
+    $values = [];
+    foreach ($this->_toched_values as $key)
+    {
+      $values[$key] = $this->_values[$key];
+    }
+
+    $where = ['id={id}', ['{id}' => $this->id]];
+
+    try
+    {
+      $result = DB::update(self::table_name(), $values, $where);
+    }
+    catch (Exception $ex)
+    {
+      $this->_last_error = $ex->getMessage();
+      return false;
+    }
+    $values = $result->fetch_assoc();
+    $result->free();
+
+    $this->set_values($values);
+    $this->_toched_values = [];
+    $this->_loaded = true;
+    return true;
   }
 
 
@@ -105,11 +178,22 @@ class ORM
    */
   public function __set(string $name, $value)
   {
-    if ( in_array( $name, self::$columns[self::class_name()] ) )
+    if (!in_array($name, self::$columns[self::class_name()]))
     {
-      $this->_values[$name] = $value;
+      throw new Exception("Column $name not exist in object");
+    }
+
+    if (array_key_exists($name, $this->_values) && $this->_values[$name] == $value)
+    {
+      return;
+    }
+    $this->_values[$name] = $value;
+    if (!in_array($name, $this->_toched_values))
+    {
+      $this->_toched_values[] = $name;
     }
   }
+
 
 
   /**
@@ -120,9 +204,9 @@ class ORM
    */
   public function __get(string $name)
   {
-    if (!in_array($name, self::$columns[self::class_name()] ))
+    if (!in_array($name, self::$columns[self::class_name()]))
     {
-      throw new Exception("Method ($name) not set in class");
+      throw new Exception("Field ($name) not set in object");
     }
 
     if (array_key_exists($name, $this->_values))
@@ -133,7 +217,8 @@ class ORM
   }
 
 
-    /**
+
+  /**
    *
    * @param array $data associative array from DB to setup object values
    * @return false if data if empty
@@ -141,7 +226,9 @@ class ORM
   private function set_values(array $data)
   {
     if (!count($data))
+    {
       return false;
+    }
 
     foreach ($data as $key => $value)
     {
@@ -169,10 +256,28 @@ class ORM
       throw new Exception("Object not found with id = $id", 1);
     }
     $class_name = self::class_name();
-    $user = new $class_name($row);
-    $user->_loaded = true;
+    $obj = new $class_name($row);
+    $obj->_loaded = true;
     $res->free();
-    return $user;
+    return $obj;
+  }
+
+
+
+  /**
+   * @param array $values associative array of values to be set in object
+   */
+  public function values(array $values = [])
+  {
+    if ($this->_loaded && array_key_exists('id', $values))
+    {
+      unset($values['id']);
+    }
+
+    foreach ($values as $key => $val)
+    {
+      $this->$key = $val;
+    }
   }
 
 
@@ -210,7 +315,7 @@ class ORM
    */
   public static function all($order = NULL, $limit = NULL)
   {
-      return self::where(NULL, $order, $limit);
+    return self::where(NULL, $order, $limit);
   }
 
 
@@ -235,7 +340,8 @@ class ORM
       $where = "$filed_id=\{$filed_id\} and ($where)";
       // add value to values array user_id = 5
       $where_array[1]["\{$filed_id\}"] = $this->id;
-    } else
+    }
+    else
     {
       $where_array = ["$filed_id=\{$filed_id\}", ["\{$filed_id\}" => $this->id]];
     }
@@ -255,7 +361,6 @@ class ORM
     // Call Comment->user
     // static - Review
     // $ref_class = user
-
     // For example User -> user_id
     $filed_id = strtolower($ref_class) . '_id';
     $id = $this->{$filed_id};
@@ -300,6 +405,21 @@ class ORM
       }
     }
     throw new Exception("Class $class_name is not in has_many or belongs_to references");
+  }
+
+
+
+  public function save(): bool
+  {
+    $this->_last_error = NULL;
+    return $this->_loaded ? $this->update() : $this->insert();
+  }
+
+
+
+  public function get_error()
+  {
+    return $this->_last_error;
   }
 
 }
