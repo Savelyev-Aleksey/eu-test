@@ -24,6 +24,9 @@
  * THE SOFTWARE.
  */
 
+/**
+ * @uses DB for connection with Database
+ */
 class ORM
 {
 
@@ -425,6 +428,13 @@ class ORM
   public function get_error()
   {
     return $this->_last_error;
+  }
+
+
+
+  public function remove(): bool
+  {
+    $this->_last_error = NULL;
   }
 
 }

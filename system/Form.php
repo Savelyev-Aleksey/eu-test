@@ -31,6 +31,8 @@
  * To start build call Form::open(...);
  * Work with fields Form::input('comment', []);
  * To end session close form Form::close();
+ *
+ * @uses Session for gets csrf token
  */
 class Form
 {

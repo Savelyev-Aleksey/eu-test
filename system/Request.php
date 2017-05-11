@@ -27,6 +27,7 @@
 /**
  * Description of Request
  *
+ * @uses Router to recall controller action with matched uri in start() method
  */
 class Request
 {

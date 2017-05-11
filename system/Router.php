@@ -30,6 +30,7 @@
  * It's stores all available routes for app.
  * And call matched control class / action.
  *
+ * @uses Request for redirect and input_filter
  */
 class Router
 {
