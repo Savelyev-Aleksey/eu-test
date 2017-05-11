@@ -50,7 +50,7 @@ class DB
       $settings = parse_ini_file('settings.ini');
     }
 
-    self::$mysqli = new mysqli("localhost", $settings['login'], $settings['password'], $settings['database']);
+    self::$mysqli = new mysqli($settings['host'], $settings['login'], $settings['password'], $settings['database']);
 
     /* check connection */
     if (self::$mysqli->connect_errno)
