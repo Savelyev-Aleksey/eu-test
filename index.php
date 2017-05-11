@@ -31,3 +31,5 @@ Router::add_router('/<controller>(/<action>(/<id>))', NULL, NULL);
 
 
 Request::start();
+
+DB::close();
