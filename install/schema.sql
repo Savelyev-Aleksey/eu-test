@@ -1,36 +1,29 @@
 -- Create users table
 CREATE TABLE `users` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `login` VARCHAR(255) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `login` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `login_UNIQUE` (`login` ASC));
+  UNIQUE KEY `login_UNIQUE` (`login`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 -- Create goods table
 CREATE TABLE `goods` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC));
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 -- Create reviews table
 CREATE TABLE `good_reviews` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id` INT NULL,
-  `good_id` INT NULL,
-  `rate` TINYINT(1) UNSIGNED NOT NULL,
-  `comment` TEXT(2000) NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned DEFAULT NULL,
+  `good_id` int(11) unsigned DEFAULT NULL,
+  `rate` tinyint(1) unsigned NOT NULL,
+  `comment` text,
   PRIMARY KEY (`id`),
-  INDEX `fk_goods_users_idx` (`user_id` ASC),
-  INDEX `fk_goods_goods_idx` (`good_id` ASC),
-  UNIQUE INDEX `user_good_id_UNIQUE` (`user_id` ASC, `good_id` ASC),
-  CONSTRAINT `fk_review_users`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `users` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_review_goods`
-    FOREIGN KEY (`good_id`)
-    REFERENCES `goods` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION);
+  UNIQUE KEY `user_good_id_UNIQUE` (`user_id`,`good_id`),
+  KEY `fk_goods_users_idx` (`user_id`),
+  KEY `fk_goods_goods_idx` (`good_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8;

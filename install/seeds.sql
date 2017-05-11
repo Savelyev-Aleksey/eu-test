@@ -20,7 +20,7 @@ VALUES
 (4,1,3,'Some good peaces, but other not good. Delivery fast at time.'), 
 (1,4,5,'Very and very nice kiwi. All loves kiwi. Awesome fast delivry like it. Recomend.'),
 (2,4,4,'Yes, kiwi really delicious. Yep delivry vey fast. Recomend.'),
-(2,4,5,'Excelent Gavai Kiwi. How they such fast moving? Great.'), 
+(3,4,5,'Excelent Gavai Kiwi. How they such fast moving? Great.'), 
 (4,6,2,'Cheap China bike. Mdahhh'),
 (1,3,1,'Where they storing oranges? look not good. No one start gues... Bad.');
 
