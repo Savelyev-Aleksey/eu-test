@@ -12,7 +12,7 @@
           <nav class="navbar navbar-default">
             <div class="container-fluid">
               <div class="navbar-header">
-                <a class="navbar-brand" href="/">Goods</a>
+                <a class="navbar-brand" href="<?= Request::uri('/')?>">Goods</a>
                 <button type="button" class="navbar-toggle collapsed"
                     data-toggle="collapse" aria-expanded="false"
                     data-target="#main-navbar" >
