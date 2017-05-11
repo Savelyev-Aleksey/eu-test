@@ -18,7 +18,7 @@ CREATE TABLE `good_reviews` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT NULL,
   `good_id` INT NULL,
-  `rate` TINYINT(1) UNSIGNED NULL,
+  `rate` TINYINT(1) UNSIGNED NOT NULL,
   `comment` TEXT(2000) NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_goods_users_idx` (`user_id` ASC),

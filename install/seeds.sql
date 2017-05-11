@@ -22,5 +22,5 @@ VALUES
 (2,4,4,'Yes, kiwi really delicious. Yep delivry vey fast. Recomend.'),
 (2,4,5,'Excelent Gavai Kiwi. How they such fast moving? Great.'), 
 (4,6,2,'Cheap China bike. Mdahhh'),
-(1,3,NULL,'Where they storing oranges? look not good. No one start gues... Bad.');
+(1,3,1,'Where they storing oranges? look not good. No one start gues... Bad.');
 
