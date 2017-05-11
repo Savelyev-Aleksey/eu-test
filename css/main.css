@@ -5622,5 +5622,22 @@ button.close {
   .hidden-print {
     display: none !important; } }
 /*# sourceMappingURL=bootstrap.min.css.map */
+html {
+  height: 100%; }
+
+body {
+  min-height: 100%;
+  position: relative;
+  padding-bottom: 52px; }
+
+body > footer {
+  color: #aaa;
+  background-color: #444;
+  height: 52px;
+  width: 100%;
+  bottom: 0;
+  text-align: center;
+  line-height: 52px;
+  position: absolute; }
 
 /*# sourceMappingURL=main.css.map */

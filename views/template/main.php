@@ -50,11 +50,11 @@
             </div>
           <?php
             endif; ?>
-          
+
           <?= $_content; ?>
         </div>
         <footer>
-            Some footer
+            Some footer LLC
         </footer>
     </body>
 </html>
