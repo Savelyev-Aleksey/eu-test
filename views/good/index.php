@@ -9,7 +9,7 @@ if (isset($goods) && is_array($goods)):
   <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
     <section class="good-elem panel panel-info">
       <header class="panel-heading">
-        <a href="/good/show/<?=$good->id;?>"><?= Render::out($good->name); ?></a>
+        <a href="<?= Request::uri('/good/show/'.$good->id)?>"><?= Render::out($good->name); ?></a>
       </header>
       <div class="panel-body">
  <?php
