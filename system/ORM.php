@@ -434,7 +434,24 @@ class ORM
 
   public function remove(): bool
   {
+    if (!$this->_loaded)
+    {
+      $this->_last_error = 'Object not loaded yet.';
+      return false;
+    }
+
+    $condition = ['`id`={id}', ['{id}' => $this->id]];
+    $res = DB::delete(self::table_name(), $condition);
+
+    if ($res === false)
+    {
+      $this->_last_error = 'Error: ' . DB::get_error() . ' in query '
+              . DB::get_query_error();
+      return false;
+    }
     $this->_last_error = NULL;
+    $this->_loaded = false;
+    return true;
   }
 
 }
