@@ -31,7 +31,7 @@ class ORM
   protected static $columns = [];
   // Array of object properties - used in __get __set methods
   protected $_values = [];
-  protected $_toched_values = [];
+  protected $_touched_values = [];
   // Marker for loaded from DB object
   protected $_loaded = false;
   protected $_valid = false;
@@ -116,20 +116,19 @@ class ORM
   protected function insert(): bool
   {
     self::init();
-    try
+    $result = DB::insert(self::table_name(), $this->_values);
+    if ($result === false)
     {
-      $result = DB::insert(self::table_name(), $this->_values);
-    }
-    catch (Exception $ex)
-    {
-      $this->_last_error = $ex->getMessage();
+      $this->_last_error = 'Error: ' . DB::get_error() . ' in query '
+              . DB::get_query_error();
       return false;
     }
+    $this->_last_error = NULL;
 
-    $values = $result->fetch_assoc();
-    $result->free();
-
-    $this->set_values($values);
+    if ($result > 0)
+    {
+      $this->id = $result;
+    }
     $this->_loaded = true;
     return true;
   }
@@ -139,32 +138,32 @@ class ORM
   protected function update(): bool
   {
     self::init();
-    if (!count($this->_toched_values))
+    if (!count($this->_touched_values))
     {
       return true;
     }
     $values = [];
-    foreach ($this->_toched_values as $key)
+    foreach ($this->_touched_values as $key)
     {
+      if ($key == 'id')
+      {
+        continue;
+      }
       $values[$key] = $this->_values[$key];
     }
 
-    $where = ['id={id}', ['{id}' => $this->id]];
+    $where = ['`id`={id}', ['{id}' => (int) $this->id]];
 
-    try
+    $result = DB::update(self::table_name(), $values, $where);
+    if ($result === false)
     {
-      $result = DB::update(self::table_name(), $values, $where);
-    }
-    catch (Exception $ex)
-    {
-      $this->_last_error = $ex->getMessage();
+      $this->_last_error = 'Error: ' . DB::get_error() . ' in query '
+              . DB::get_query_error();
       return false;
     }
-    $values = $result->fetch_assoc();
-    $result->free();
+    $this->_last_error = NULL;
 
-    $this->set_values($values);
-    $this->_toched_values = [];
+    $this->_touched_values = [];
     $this->_loaded = true;
     return true;
   }
@@ -188,9 +187,9 @@ class ORM
       return;
     }
     $this->_values[$name] = $value;
-    if (!in_array($name, $this->_toched_values))
+    if (!in_array($name, $this->_touched_values))
     {
-      $this->_toched_values[] = $name;
+      $this->_touched_values[] = $name;
     }
   }
 
@@ -251,12 +250,18 @@ class ORM
     $init = self::init();
     $where = array('id={id}', array('{id}' => $id));
     $res = self::select($where, '*', NULL, 1);
-    if (!($row = $res->fetch_assoc()))
+    if ($res === false)
+    {
+      throw new Exception('Query occur error: ' . DB::get_error()
+      . ' in query ' . DB::get_query_error());
+    }
+    if (!($values = $res->fetch_assoc()))
     {
       throw new Exception("Object not found with id = $id", 1);
     }
     $class_name = self::class_name();
-    $obj = new $class_name($row);
+    $obj = new $class_name($values);
+    $obj->_touched_values = [];
     $obj->_loaded = true;
     $res->free();
     return $obj;
