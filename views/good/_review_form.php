@@ -2,6 +2,7 @@
     'class' => 'form-horizontal']); ?>
 
   <div class="form-group">
+    <?php if ($review->id) echo Form::hidden('id'); ?>
     <?= Form::hidden('good_id'); ?>
   </div>
 
