@@ -431,4 +431,40 @@ class DB
     return self::exec($query);
   }
 
+
+
+  /**
+   * Prepare delete query sting
+   * @param string $table name of affected table
+   * @param array $condition WHERE statement - look select_query for more info
+   * @return string exec ready query
+   * @throws Exception if query parameters incorrect
+   */
+  static protected function delete_query(string $table, array $condition): string
+  {
+    if (!strlen($table) || !count($condition))
+    {
+      throw new Exception("Nothing to delete");
+    }
+    $table = self::escape_table($table);
+
+    $where = self::escape_condition($condition);
+
+    return "DELETE FROM `$table`$where;";
+  }
+
+
+
+  /**
+   * Execute delete query for non empty condition
+   * @param string $table name of affected table
+   * @param array $condition WHERE statement - look select_query for more info
+   * @return bool true if success or false if exec fails
+   */
+  static public function delete(string $table, array $condition): bool
+  {
+    $query = self::delete_query($table, $condition);
+    return self::exec($query);
+  }
+
 }
