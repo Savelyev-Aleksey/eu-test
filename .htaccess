@@ -9,9 +9,13 @@ RewriteBase /
 	Order Deny,Allow
 	Deny From All
 </Files>
+<Files *.ini>
+	Order Deny,Allow
+	Deny From All
+</Files>
 
 # Protect application and system files from being viewed
-RewriteRule ^(?:application|modules|system)\b.* index.php/$0 [L]
+RewriteRule ^(?:install|controllers|models|views|system)\b.* index.php/$0 [L]
 
 # Allow any files or directories that exist to be displayed directly
 RewriteCond %{REQUEST_FILENAME} !-f
