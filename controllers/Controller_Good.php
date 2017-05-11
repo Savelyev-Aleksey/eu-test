@@ -7,6 +7,8 @@
 class Controller_Good extends Controller_Base_Auth
 {
 
+
+
   public function action_index()
   {
     $user = User::get_authorized_user();
@@ -46,7 +48,7 @@ class Controller_Good extends Controller_Base_Auth
 
     if (isset($values['id']))
     {
-      // UPDATE STATE
+      // UPDATE OR DELETE STATE
       try
       {
         $review = Good_Review::find($values['id']);
@@ -63,23 +65,44 @@ class Controller_Good extends Controller_Base_Auth
         Request::redirect('/');
       }
 
+      // if not set rate then DELETE review
+      if ($values['rate'] === '')
+      {
+        $res = $review->remove();
+        if ($res)
+        {
+          Session::flash('Review was deleted');
+          Request::redirect('/');
+        }
+        else
+        {
+          Session::flash('Can\'t remove review: ' . $review->get_error());
+          Request::redirect('/');
+        }
+      }
+      // UPDATE state
       unset($values['good_id']); // exclude to change existing good_id
       $review->values($values);
     }
     else
     {
-      // INSERT STATE
+      if ($values['rate'] === '')
+      {
+        Session::flash('Rating not set. Nothing to save.');
+        Request::redirect('/');
+      }
+      // INSERT STATE with non empty rate
       $values['user_id'] = $user_id;
       $review = new Good_Review($values);
     }
-    
+
     if ($review->save())
     {
       Session::flash('Review saved.');
     }
     else
     {
-      Session::flash('<strong>Error:</strong> '. $review->get_error());
+      Session::flash('<strong>Error:</strong> ' . $review->get_error());
     }
     Request::redirect('/');
   }
