@@ -36,6 +36,11 @@ class Request
   static protected $_get = array();
   static protected $_post = array();
 
+  /**
+   * @var string relative path to script root location
+   */
+  static protected $_dir = '/';
+
 
 
   /**
@@ -79,6 +84,8 @@ class Request
   static public function start()
   {
     self::$_method = $_SERVER['REQUEST_METHOD'];
+
+    self::$_dir = substr($_SERVER['SCRIPT_NAME'], 0, -9);
 
     if (count($_POST))
     {
@@ -129,12 +136,31 @@ class Request
   public static function redirect($rel_path, bool $add_ref = false, $status = NULL)
   {
     $http = array_key_exists('HTTPS', $_SERVER) ? 'https' : 'http';
-    $server = $_SERVER['SERVER_NAME'];
+    $host = $_SERVER['SERVER_NAME'];
     if ($rel_path === '/')
+    {
       $rel_path = '';
+    }
+    $dir = self::$_dir;
     $ref = $add_ref ? '?_ref=' . self::$_current_path : '';
-    header("Location: $http://$server/$rel_path$ref", true, $status);
+    header('Location: ' . $http . '://' . $host . $dir . $rel_path . $ref, true, $status);
     exit;
+  }
+
+
+
+  /**
+   * Concate current directory of project to relative path
+   * @param string $rel_path
+   * @return string
+   */
+  public static function uri(string $rel_path): string
+  {
+    if ($rel_path[0] == '/')
+    {
+      $rel_path = substr($rel_path, 1);
+    }
+    return self::$_dir . $rel_path;
   }
 
 

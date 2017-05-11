@@ -3,9 +3,9 @@
     <head>
         <meta charset="utf-8">
         <title>Some title</title>
-        <link href="/css/main.css" rel="stylesheet" type="text/css">
-        <script src="/js/jquery-3.2.1.min.js"></script>
-        <script src="/js/bootstrap.min.js"></script>
+        <link href="<?= Request::uri('css/main.css') ?>" rel="stylesheet" type="text/css">
+        <script src="<?= Request::uri('js/jquery-3.2.1.min.js') ?>"></script>
+        <script src="<?= Request::uri('js/bootstrap.min.js') ?>"></script>
     </head>
     <body>
         <header>

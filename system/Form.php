@@ -98,12 +98,17 @@ class Form
       unset($options['multipart']);
     }
 
+    if (array_key_exists('action', $options))
+    {
+      $options['action'] = Request::uri($options['action']);
+    }
+
     $attr = self::glue($options);
 
-    $form = '<form'. $attr. '>'. PHP_EOL;
+    $form = '<form' . $attr . '>' . PHP_EOL;
 
     // Add CSRF token
-    if (strcasecmp($options['method'],'post') === 0)
+    if (strcasecmp($options['method'], 'post') === 0)
     {
       $form .= self::hidden(Session::token_key(), Session::get_token());
     }
@@ -116,7 +121,7 @@ class Form
   public static function close()
   {
     self::$obj = NULL;
-    return '</form>'. PHP_EOL;
+    return '</form>' . PHP_EOL;
   }
 
 
@@ -124,7 +129,7 @@ class Form
   public static function submit($text, array $options = [])
   {
     $attr = self::glue($options);
-    return "<button type=\"submit\"$attr>$text</button>". PHP_EOL;
+    return "<button type=\"submit\"$attr>$text</button>" . PHP_EOL;
   }
 
 
@@ -138,7 +143,7 @@ class Form
 
     $attr = self::glue($attributes);
 
-    $buf = "<select name=\"$name\"$attr>". PHP_EOL;
+    $buf = "<select name=\"$name\"$attr>" . PHP_EOL;
 
     if (!is_array($selected))
     {
@@ -148,7 +153,7 @@ class Form
       }
       else
       {
-        $selected = [ (string) $selected ];
+        $selected = [(string) $selected];
       }
     }
 
@@ -157,15 +162,15 @@ class Form
       $sel_opt = in_array($value, $selected) ? ' selected' : '';
       if ($value === NULL)
       {
-        $buf = $buf.'<option'.$sel_opt.'></option>'.PHP_EOL;
+        $buf = $buf . '<option' . $sel_opt . '></option>' . PHP_EOL;
       }
       else
       {
-        $buf = $buf.'<option'.$sel_opt.' value="'.$value.'">'.$key.'</option>'.PHP_EOL;
+        $buf = $buf . '<option' . $sel_opt . ' value="' . $value . '">' . $key . '</option>' . PHP_EOL;
       }
     }
 
-    $buf .= '</select>'. PHP_EOL;
+    $buf .= '</select>' . PHP_EOL;
 
     return $buf;
   }
@@ -175,7 +180,7 @@ class Form
   public static function label($for, $title, array $options = [])
   {
     $options_buf = self::glue($options);
-    return "<label for=\"$for\"$options_buf>$title</label>". PHP_EOL;
+    return "<label for=\"$for\"$options_buf>$title</label>" . PHP_EOL;
   }
 
 
@@ -216,7 +221,7 @@ class Form
 
     $attr = self::glue($options);
 
-    return "<input name=\"$name\"$attr>". PHP_EOL;
+    return "<input name=\"$name\"$attr>" . PHP_EOL;
   }
 
 
@@ -235,7 +240,7 @@ class Form
 
     $attr = self::glue($options);
 
-    return "<input type=\"hidden\" name=\"$name\"$attr>". PHP_EOL;
+    return "<input type=\"hidden\" name=\"$name\"$attr>" . PHP_EOL;
   }
 
 
@@ -285,6 +290,7 @@ class Form
   }
 
 
+
   public static function textarea($name, array $options = [])
   {
     if (array_key_exists('value', $options))
@@ -304,6 +310,7 @@ class Form
 
     $attr = self::glue($options);
 
-    return "<textarea name=\"$name\" $attr>$val</textarea>". PHP_EOL;
+    return "<textarea name=\"$name\" $attr>$val</textarea>" . PHP_EOL;
   }
+
 }

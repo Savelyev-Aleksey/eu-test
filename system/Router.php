@@ -47,7 +47,7 @@ class Router
   static protected $_routes = array();
   static protected $_params = array();
   static protected $_current_path = NULL;
-
+  
   /**
    * Pushes new route to Router - routes matching by historical added order.
    * @param type $path added to router by type '<controller>(/<action>(/<id>))'

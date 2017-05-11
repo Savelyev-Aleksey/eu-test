@@ -5,12 +5,13 @@
         <h3 class="panel-title">Please login to proceed</h3>
       </div>
       <div class="panel-body">
-        <form method="post" action="/user/login" id="user-login" class="form-horizontal">
+        <?= Form::open(['method' => 'post', 'action' => '/user/login',
+            'id' => 'user-login', 'class' => 'form-horizontal'])?>
           <div class="form-group">
-            <label for="login" class="col-sm-2">Login</label>
+            <?= Form::label('login', 'Login', ['class' => 'col-sm-2'])?>
             <div class="col-sm-10">
-              <input type="text" name="login" id="login" placeholder="login" class="form-control"
-                     value="<?php if (isset($login)) echo $login; ?>">
+              <?= Form::input('login',['placeholder' => true, 'class' => 'form-control',
+                      'value' => $login])?>
             </div>
           </div>
 
@@ -25,7 +26,7 @@
               <button type="submit" class="btn btn-primary">Sign in</button>
             </div>
           </div>
-        </form>
+        <?= Form::close(); ?>
       </div>
     </div>
   </div>
