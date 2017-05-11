@@ -33,24 +33,22 @@ class DB
   const QUERY_LIM = 1000;
 
   private static $mysqli = NULL;
-  private static $error = NULL;
-
-
-
-  function __construct()
-  {
-    self::init();
-  }
+  private static $query_error = NULL;
 
 
 
   // Init singleton Connection to DB
-  public static function init()
+  public static function init(array $settings = NULL)
   {
     if (!is_null(self::$mysqli))
+    {
       return;
+    }
 
-    $settings = parse_ini_file('settings.ini');
+    if (!$settings)
+    {
+      $settings = parse_ini_file('settings.ini');
+    }
 
     self::$mysqli = new mysqli("localhost", $settings['login'], $settings['password'], $settings['database']);
 
@@ -65,10 +63,49 @@ class DB
 
 
 
-  function __destruct()
+  public static function close()
   {
     if (self::$mysqli)
+    {
       self::$mysqli->close();
+    }
+  }
+
+
+
+  /**
+   * Executes generated query and return result.
+   * If exec fails set error from MySQLi error and query which error occur.
+   * @param string $query safe ready prepared query string for exec
+   * @return boolean true on non select queries, MySQLi result for select,
+   * false if error occur. Look DB::$error and DB::$query_error
+   */
+  static protected function exec(string $query)
+  {
+    $res = self::$mysqli->query($query);
+    self::$query_error = NULL;
+
+    if ($res === false)
+    {
+      self::$query_error = $query;
+      return false;
+    }
+
+    return $res;
+  }
+
+
+
+  static public function get_error()
+  {
+    return self::$mysqli->error;
+  }
+
+
+
+  static public function get_query_error()
+  {
+    return self::$query_error;
   }
 
 
@@ -84,7 +121,9 @@ class DB
   static function &show_columns($table)
   {
     if (is_null($table))
+    {
       return NULL;
+    }
 
     self::init();
 
@@ -95,10 +134,14 @@ class DB
     $result = self::$mysqli->query("SHOW COLUMNS FROM $table");
 
     if ($result === false)
+    {
       throw new Exception("Table $table was not found. ", 1);
+    }
 
     if ($result->num_rows === 0)
+    {
       return false;
+    }
 
     $columns = array();
     $data = $result->fetch_all(MYSQLI_NUM);
@@ -131,7 +174,7 @@ class DB
    */
   private static function escape_condition($condition)
   {
-    if (is_null($condition))
+    if ($condition === NULL)
     {
       return '';
     }
@@ -148,7 +191,8 @@ class DB
       if (is_string($val))
       {
         $val = '"' . self::escape($val) . '"';
-      } elseif (!is_numeric($val))
+      }
+      elseif (!is_numeric($val))
       {
         throw new Exception("Values in query must be only strings or numbers. ", 1);
       }
@@ -170,7 +214,7 @@ class DB
    */
   private static function escape_fields($fields)
   {
-    if ($fields === '*' || is_null($fields))
+    if ($fields === '*' || $fields === NULL)
     {
       return '*';
     }
@@ -193,7 +237,7 @@ class DB
 
   private static function escape_order($order)
   {
-    if (is_null($order))
+    if ($order === NULL)
     {
       return '';
     }
@@ -214,11 +258,8 @@ class DB
 
 
   /**
-   * create database select query but not execute;
-   * Added for multi query operations.
-   * For example insert new record with default values and return from DB set values.
-   *
-   * condition must set as array('filed={val-key}', array('{val-key}' => $value))
+   * Create database select query but not execute.
+   * Condition must set as array('filed={val-key}', array('{val-key}' => $value))
    * set only unique key in query - see doc strtr() more info.
    * @param string $table name where query affected
    * @param array $condition type of ['id={id} AND ...', ['{id}' => 2, ...]]
@@ -260,7 +301,7 @@ class DB
 
     $limit = 'LIMIT ' . $limit;
 
-    return "SELECT $fields FROM $table $where $order $limit;";
+    return "SELECT $fields FROM `$table` $where $order $limit;";
   }
 
 
@@ -274,20 +315,12 @@ class DB
    * @param string or array $fields fields filter
    * @param string $order type of 'name.ASC, date.DESC'
    * @param type $limit
-   * @return type
-   * @throws Exception if query exec fails
+   * @return mixed false if error occur. or MySQLi result object
    */
   static public function select(string $table, array $condition = NULL, $fields = '*', string $order = NULL, int $limit = NULL)
   {
     $query = self::select_query($table, $condition, $fields, $order, $limit);
-    $res = self::$mysqli->query($query);
-
-    if ($res === false)
-    {
-      throw new Exception('Query (' . $query . ') returns error: ' . self::$mysqli->error, 1);
-    }
-
-    return $res;
+    return self::exec($query);
   }
 
 
@@ -305,49 +338,29 @@ class DB
     {
       throw new Exception("Nothing to insert");
     }
+    $table = self::escape_table($table);
+
     $keys = [];
     $values = [];
 
     foreach ($raw_values as $key => $value)
     {
       $keys[] = '`' . self::escape($key) . '`';
-      $values[] = is_null($value) ? 'NULL' : '\'' . self::escape($value) . '\'';
+      $values[] = is_null($value) ? 'NULL' :
+              (is_numeric($value) ? $value : '\'' . self::escape($value) . '\'');
     }
 
     $keys = implode(',', $keys);
     $values = implode(',', $values);
 
-    return "INSERT INTO $table($keys) VALUES($values);";
+    return "INSERT INTO `$table`($keys) VALUES($values);";
   }
 
 
 
   /**
-   * Insert in DB new records only.
-   * To return newly created record use DB::insert() instead.
-   * @param string $table
-   * @param array $raw_values
-   * @return mixed MySQLi query result Object - selected from DB data
-   * @throws Exception if query exec fails
-   */
-  static public function insert_exec(string $table, array $raw_values): bool
-  {
-    $query = self::insert_query($table, $raw_values);
-    $res = self::$mysqli->query($query);
-
-    if ($res === false)
-    {
-      throw new Exception('Query (' . $query . ') returns error: ' . self::$mysqli->error, 1);
-    }
-
-    return $res;
-  }
-
-
-
-  /**
-   * Insert in DB new record and returns newly created record with filled params.
-   * For example returns set id, or default value for field.
+   * Insert in DB new record and returns newly created record id
+   * for auto increment field or true.
    * @param string $table
    * @param array $raw_values
    * @return mixed MySQLi query result Object - selected from DB data
@@ -355,16 +368,15 @@ class DB
    */
   static public function insert(string $table, array $raw_values)
   {
-    $query = self::insert_query($table, $raw_values)
-            . "SELECT * FROM $table WHERE id = LAST_INSERT_ID();";
-    $res = self::$mysqli->query($query);
+    $query = self::insert_query($table, $raw_values);
+    $res = self::exec($query);
 
     if ($res === false)
     {
-      throw new Exception('Query (' . $query . ') returns error: ' . self::$mysqli->error, 1);
+      return false;
     }
-
-    return $res;
+    $id = self::$mysqli->insert_id;
+    return $id !== 0 ? $id : true;
   }
 
 
@@ -384,6 +396,7 @@ class DB
       throw new Exception("Nothing to update");
     }
 
+    $table = self::escape_table($table);
     $where = self::escape_condition($condition);
 
 
@@ -392,13 +405,14 @@ class DB
     foreach ($raw_values as $key => $value)
     {
       $key = '`' . self::escape($key) . '`';
-      $value = is_null($value) ? 'DEFAULT' : '\'' . self::escape($value) . '\'';
+      $value = is_null($value) ? 'DEFAULT' :
+              is_numeric($value) ? $value : '\'' . self::escape($value) . '\'';
       $values[] = $key . ' = ' . $value;
     }
 
     $values = implode(',', $values);
 
-    return "UPDATE $table($keys) SET $values $where;";
+    return "UPDATE `$table` SET $values $where;";
   }
 
 
@@ -413,40 +427,8 @@ class DB
    */
   static public function update(string $table, array $raw_values, array $condition)
   {
-    $query = self::update_query($table, $raw_values, $condition)
-            . "SELECT * FROM $table WHERE id = LAST_INSERT_ID();";
-
-    $res = self::$mysqli->query($query);
-
-    if ($res === false)
-    {
-      throw new Exception('Query (' . $query . ') returns error: ' . self::$mysqli->error, 1);
-    }
-
-    return $res;
-  }
-
-
-
-  /**
-   * Update record without return updated records
-   * @param string $table
-   * @param array $raw_values values to be updated in record
-   * @param array $condition - WHERE condition look syntax on select_query
-   * @return bool true if success
-   * @throws Exception
-   */
-  static public function update_exec(string $table, array $raw_values, array $condition): bool
-  {
     $query = self::update_query($table, $raw_values, $condition);
-    $res = self::$mysqli->query($query);
-
-    if ($res === false)
-    {
-      throw new Exception('Query (' . $query . ') returns error: ' . self::$mysqli->error, 1);
-    }
-
-    return $res;
+    return self::exec($query);
   }
 
 }
