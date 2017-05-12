@@ -4,6 +4,7 @@
 <div class="row">
 <?php
   $reviews = $good->good_reviews();
+  $total_rate = 0;
   foreach ($reviews as $review):
 ?>
   <div class="col-md-6">
@@ -15,6 +16,7 @@
       <p><strong>Rating:</strong>
 <?php
       $rate = $review->rate;
+      $total_rate += $rate;
       for($i = 0; $i < $rate; $i++):
 ?>
         <span class="glyphicon glyphicon-star"></span>
@@ -36,3 +38,8 @@
   endforeach;
  ?>
 </div>
+<section class="total-rating">
+  <p><strong>Total rating:</strong> <?= $total_rate; ?></p>
+  <?php $avg = count($reviews) ? $total_rate / count($reviews) : 0;?>
+  <p><strong>Average rating:</strong> <?= number_format($avg, 1); ?></p>
+</section>
