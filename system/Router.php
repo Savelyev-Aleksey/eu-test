@@ -47,7 +47,9 @@ class Router
   static protected $_routes = array();
   static protected $_params = array();
   static protected $_current_path = NULL;
-  
+
+
+
   /**
    * Pushes new route to Router - routes matching by historical added order.
    * @param type $path added to router by type '<controller>(/<action>(/<id>))'
@@ -185,10 +187,19 @@ class Router
     $controller_name = 'Controller_' . self::$_params['controller'];
     $action_name = 'action_' . self::$_params['action'];
 
-    $controller = new $controller_name();
-
-    $controller->$action_name();
+    try
+    {
+      $controller = new $controller_name();
+      $controller->$action_name();
+    }
+    catch (Exception $ex)
+    {
+      error_log('Not found path for: ' . $controller_name . ' ' . $action_name);
+      Request::redirect('public/404.php', true);
+    }
   }
+
+
 
   /**
    * Returns the compiled regular expression for the route. This translates
@@ -234,6 +245,13 @@ class Router
     }
 
     return '#^' . $expression . '$#uD';
+  }
+
+
+
+  static public function get_current_path()
+  {
+    return self::$_current_path;
   }
 
 }

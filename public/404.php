@@ -1,5 +1,5 @@
 <?php
-    require_once '../system/Router.php';
+    require_once '../system/Request.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -11,7 +11,7 @@
     <body>
         <p>
             Sorry, the page was you looked -
-            (<?php echo Router::input_filter($_GET['_ref']);?>)
+            (<?= Request::input_filter($_GET['_ref']);?>)
             was not found.
         </p>
 

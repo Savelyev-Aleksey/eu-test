@@ -142,7 +142,7 @@ class Request
       $rel_path = '';
     }
     $dir = self::$_dir;
-    $ref = $add_ref ? '?_ref=' . self::$_current_path : '';
+    $ref = $add_ref ? '?_ref=' . Router::get_current_path() : '';
     header('Location: ' . $http . '://' . $host . $dir . $rel_path . $ref, true, $status);
     exit;
   }
