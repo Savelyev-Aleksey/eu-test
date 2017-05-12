@@ -43,11 +43,12 @@ class Controller_User extends Controller_Base
       if (isset($login))
       {
         $user = User::authorize($login, Request::post('password'));
-        if ($user->is_authorized())
+        if ($user && $user->is_authorized())
         {
           Session::flash("{$user->login}, welcome on site.");
           Request::redirect('/');
         }
+        Session::flash(User::get_auth_error());
       }
     }
 

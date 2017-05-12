@@ -5,8 +5,9 @@ class User extends ORM
 
   protected static $has_many = ['Good_Review'];
   protected static $authorized_user = NULL;
+  protected static $auth_error = NULL;
   protected $authorized = false;
-  protected $auth_error = NULL;
+
 
   // Test func for manually set adm pass
   public static function get_hash_pass($pass = 'admin')
@@ -52,16 +53,19 @@ class User extends ORM
    * Return authorized user instance on success
    * @param string $login
    * @param string $raw_pass
-   * @return NULL if error occur or User authorized instance
+   * @return User instance on success or
+   * NULL if error occur or User authorized instance
    */
   public static function authorize($login, $raw_pass)
   {
     $where = array('login={1}', array('{1}' => $login));
     $users = self::where($where, 'id.ASC', 1);
 
+    self::$auth_error = NULL;
+
     if (!count($users) || count($users) > 1)
     {
-      $this->auth_error = 'User not found';
+      self::$auth_error = 'User not found';
       return NULL;
     }
 
@@ -69,7 +73,7 @@ class User extends ORM
 
     if (!password_verify($raw_pass, $user->password))
     {
-      $this->auth_error = 'Password was incorrect';
+      self::$auth_error = 'Password was incorrect';
       return NULL;
     }
 
@@ -95,6 +99,11 @@ class User extends ORM
     Session::destroy();
 
     return true;
+  }
+
+  static public function get_auth_error(): string
+  {
+    return self::$auth_error;
   }
 
 }
