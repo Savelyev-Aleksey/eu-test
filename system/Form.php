@@ -62,6 +62,13 @@ class Form
 
 
 
+  public static function escape($string): string
+  {
+    return addslashes($string);
+  }
+
+
+
   public static function open($object, array $options = [])
   {
     if (!is_null(self::$obj))
@@ -166,6 +173,7 @@ class Form
       }
       else
       {
+        $value = self::escape($value);
         $buf = $buf . '<option' . $sel_opt . ' value="' . $value . '">' . $key . '</option>' . PHP_EOL;
       }
     }
@@ -209,6 +217,10 @@ class Form
       {
         unset($options['value']);
       }
+      else
+      {
+        $options['value'] = self::escape($options['value']);
+      }
     }
     else
     {
@@ -216,7 +228,7 @@ class Form
       {
         throw new Exception('Object not set in form and value not given.');
       }
-      $options['value'] = self::$obj->$name;
+      $options['value'] = self::escape(self::$obj->$name);
     }
 
     $attr = self::glue($options);
@@ -235,7 +247,7 @@ class Form
     }
     else
     {
-      $options['value'] = $value;
+      $options['value'] = self::escape($value);
     }
 
     $attr = self::glue($options);
@@ -309,7 +321,7 @@ class Form
     }
 
     $attr = self::glue($options);
-
+    $val = htmlspecialchars($val);
     return "<textarea name=\"$name\" $attr>$val</textarea>" . PHP_EOL;
   }
 

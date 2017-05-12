@@ -73,7 +73,7 @@ class Request
    */
   static public function input_filter(string $value): string
   {
-    return htmlspecialchars(trim($value));
+    return (trim($value));
   }
 
 
