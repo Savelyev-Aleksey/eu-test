@@ -1,3 +1,5 @@
 /*.log
 /nbproject/
 /scss/.sass-cache/
+/.htaccess
+/settings.ini
